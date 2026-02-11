@@ -1,0 +1,118 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  username       String    @unique
+  email          String    @unique
+  password       String
+  balance        Float     @default(0)
+  frozenBalance  Float     @default(0)
+  role           String    @default("user") 
+  address        String?   // เพิ่มที่อยู่เริ่มต้น
+  phoneNumber    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  products       Product[]
+  bids           Bid[]
+  sessions       Session[]
+  transactions   WalletTransaction[]
+  orders         Order[]   @relation("BuyerOrders")
+  sales          Order[]   @relation("SellerOrders")
+
+  isVerified Boolean   @default(false) 
+  verifyToken String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+}
+
+model Product {
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String?
+  type          String         @default("auction") // "auction", "fixed_price"
+  startPrice    Float
+  buyItNowPrice Float?
+  currentPrice  Float          @default(0)
+  endTime       DateTime?
+  status        String         @default("active") // "active", "pending_payment", "sold", "ended"
+  sellerId      Int
+  seller        User           @relation(fields: [sellerId], references: [id])
+  
+  media         ProductMedia[]
+  bids          Bid[]
+  order         Order?         // 1 สินค้า (ที่จบแล้ว) จะมี 1 Order
+  createdAt     DateTime       @default(now())
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  orderNo       String   @unique // เช่น ORD-20260210-XXXX
+  productId     Int      @unique
+  buyerId       Int
+  sellerId      Int
+  amount        Float    // ยอดสุทธิที่ต้องจ่าย (ราคาสุดท้าย)
+  depositPaid   Float    @default(0) // ยอด 10% ที่หักไปแล้ว
+  remainingPaid Float    @default(0) // ยอดส่วนต่างที่จ่ายเพิ่ม
+  status        String   @default("pending") // "pending", "paid", "shipped", "completed", "cancelled"
+  
+  // ข้อมูลการจัดส่ง ณ ตอนที่ซื้อ (ป้องกัน user เปลี่ยนที่อยู่ทีหลังแล้วข้อมูลเพี้ยน)
+  shippingAddress String
+  trackingNumber  String?
+  
+  product       Product  @relation(fields: [productId], references: [id])
+  buyer         User     @relation("BuyerOrders", fields: [buyerId], references: [id])
+  seller        User     @relation("SellerOrders", fields: [sellerId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       Int
+  refreshToken String   
+  deviceInfo   String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+
+model ProductMedia {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  url       String   // ลิงก์ที่มาจาก MinIO
+  type      String   // "image" หรือ "video"
+  order     Int      @default(0) // ไว้เรียงลำดับรูป
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Bid {
+  id        Int      @id @default(autoincrement())
+  amount    Float
+  createdAt DateTime @default(now())
+  userId    Int
+  productId Int
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model WalletTransaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  amount    Float
+  type      String   // "topup", "withdraw", "freeze", "unfreeze", "pay"
+  status    String   // "pending", "success", "failed"
+  slipUrl   String?  // เก็บลิงก์สลิปที่โอนเข้า MinIO
+  payload   Json?    // เก็บข้อมูลดิบจาก SlipOk
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
