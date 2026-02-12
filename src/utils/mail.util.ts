@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
 });
 
 export const sendVerifyEmail = async (email: string, token: string) => {
-  const url = `http://localhost:3000/api/auth/verify-email?token=${token}`;
+  const url = `${process.env.BASE_URL}${process.env.VERSION}/auth/verify-email?token=${token}`;
 
   await transporter.sendMail({
     from: '"Auction System" <noreply@auction.com>',
@@ -22,7 +22,7 @@ export const sendVerifyEmail = async (email: string, token: string) => {
 };
 
 export const sendResetPasswordEmail = async (email: string, token: string) => {
-  const url = `http://localhost:3000/api/auth/reset-password?token=${token}`;
+  const url = `${process.env.BASE_URL}${process.env.VERSION}/auth/reset-password?token=${token}`;
 
   await transporter.sendMail({
     from: '"Auction System" <noreply@auction.com>',

@@ -21,22 +21,18 @@ router.get("/verify-email", authController.verifyEmail); //  GET จาก Link
 router.post("/resend-verification", authController.resendVerification);
 router.post("/forgot-password", validate(forgotPasswordSchema), authController.forgotPassword);
 router.post("/reset-password", validate(resetPasswordSchema), authController.resetPassword);
-router.post("/reset-password", validate(resetPasswordSchema), authController.resetPassword);
-
-
 
 // ==========================================
 //  PROTECTED ROUTES
 // ==========================================
 
-const protectedRouter = Router();
-protectedRouter.use(authenticate); 
+router.use(authenticate); 
 
-protectedRouter.post("/logout", authController.logout);
-protectedRouter.post("/logout-all", authController.logoutAll);
-protectedRouter.post("/refresh-token", authController.refreshAccessToken);
+router.post("/logout", authController.logout);
+router.post("/logout-all", authController.logoutAll);
+router.post("/refresh-token", authController.refreshAccessToken);
 
 
-router.use(protectedRouter);
+router.use(router);
 
 export default router;
