@@ -3,8 +3,17 @@ import * as productController from "../controllers/product.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router = Router();
+
+// ==========================================
+//  PUBLIC ROUTES
+// ==========================================
+
 router.get("/", productController.getProducts);
 router.get("/:id", productController.getProductById);
+
+// ==========================================
+//  PROTECTED ROUTES
+// ==========================================
 
 router.use(authenticate); 
 
