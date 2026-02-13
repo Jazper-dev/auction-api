@@ -1,3 +1,4 @@
+// src/middlewares/error.middleware.ts
 import { Request, Response, NextFunction } from "express";
 
 export const errorHandler = (
@@ -6,8 +7,13 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  return res.status(err.statusCode || 500).json({
+  const status = err.statusCode || err.status || 500;
+  const message = err.message || "Internal Server Error";
+
+  return res.status(status).json({
     success: false,
-    message: err.message || "Internal Server Error",
+    status,
+    message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : {},
   });
 };
