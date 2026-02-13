@@ -63,8 +63,6 @@ model Order {
   depositPaid   Float    @default(0) // ยอด 10% ที่หักไปแล้ว
   remainingPaid Float    @default(0) // ยอดส่วนต่างที่จ่ายเพิ่ม
   status        String   @default("pending") // "pending", "paid", "shipped", "completed", "cancelled"
-  
-  // ข้อมูลการจัดส่ง ณ ตอนที่ซื้อ (ป้องกัน user เปลี่ยนที่อยู่ทีหลังแล้วข้อมูลเพี้ยน)
   shippingAddress String
   trackingNumber  String?
   
@@ -89,8 +87,8 @@ model Session {
 model ProductMedia {
   id        Int      @id @default(autoincrement())
   productId Int
-  url       String   // ลิงก์ที่มาจาก MinIO
-  type      String   // "image" หรือ "video"
+  url       String   
+  type      String   
   order     Int      @default(0) // ไว้เรียงลำดับรูป
   product   Product  @relation(fields: [productId], references: [id])
 }
@@ -103,6 +101,8 @@ model Bid {
   productId Int
   user      User     @relation(fields: [userId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
+
+  @@index([productId, amount])
 }
 
 model WalletTransaction {
@@ -115,4 +115,8 @@ model WalletTransaction {
   payload   Json?    // เก็บข้อมูลดิบจาก SlipOk
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+  productId Int?     // เพิ่มมาเพื่อรู้ว่าหักจากชิ้นไหน
+  orderId   Int?     // เพิ่มมาเพื่อโยงกับ Order
+ 
+
 }

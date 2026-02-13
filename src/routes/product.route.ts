@@ -25,4 +25,4 @@ router.post("/",validate(createProductSchema), productController.createProduct);
 router.patch("/:id",validate(updateProductSchema), productController.updateProduct);       
 router.delete("/:id", productController.deleteProduct);     
 
-export default router;
+export default router; 

@@ -4,10 +4,12 @@ import { z } from "zod";
 export const registerUploadDocs = () => {
   const TAG = "Uploads";
 
+  // 1. Upload Image
   registry.registerPath({
     method: "post",
     path: "/uploads/image",
     tags: [TAG],
+    summary: "Upload an image to MinIO", 
     security: [{ bearerAuth: [] }],
     request: {
       body: {
@@ -44,10 +46,12 @@ export const registerUploadDocs = () => {
     },
   });
 
+  // 2. Upload Video
   registry.registerPath({
     method: "post",
     path: "/uploads/video",
     tags: [TAG],
+    summary: "Upload a video to MinIO", 
     security: [{ bearerAuth: [] }],
     request: {
       body: {

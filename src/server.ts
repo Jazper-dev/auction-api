@@ -10,6 +10,9 @@ const io = new Server(httpServer, {
 });
 
 app.set("io", io);
+io.on("connection", (socket) => {
+  console.log(`📡 Client connected: ${socket.id}`);
+});
 
 async function startServer() {
   try {
@@ -20,7 +23,7 @@ async function startServer() {
       console.log(`📖 Swagger API Docs: http://localhost:${PORT}/api-docs`);
     });
   } catch (error) {
-    console.error("❌ Failed to start:", error);
+    console.error("Failed to start:", error);
   }
 }
 

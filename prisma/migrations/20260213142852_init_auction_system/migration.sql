@@ -60,7 +60,7 @@ CREATE TABLE "Session" (
     "id" TEXT NOT NULL,
     "userId" INTEGER NOT NULL,
     "refreshToken" TEXT NOT NULL,
-    "deviceInfo" TEXT,
+    "deviceInfo" TEXT NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -99,6 +99,8 @@ CREATE TABLE "WalletTransaction" (
     "slipUrl" TEXT,
     "payload" JSONB,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "productId" INTEGER,
+    "orderId" INTEGER,
 
     CONSTRAINT "WalletTransaction_pkey" PRIMARY KEY ("id")
 );
@@ -116,7 +118,7 @@ CREATE UNIQUE INDEX "Order_orderNo_key" ON "Order"("orderNo");
 CREATE UNIQUE INDEX "Order_productId_key" ON "Order"("productId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Session_refreshToken_key" ON "Session"("refreshToken");
+CREATE INDEX "Bid_productId_amount_idx" ON "Bid"("productId", "amount");
 
 -- AddForeignKey
 ALTER TABLE "Product" ADD CONSTRAINT "Product_sellerId_fkey" FOREIGN KEY ("sellerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -7,11 +7,14 @@ import {
 } from "../schemas/auth.schema.js";
 
 export const registerAuthDocs = () => {
+  const TAG = "Authentication";
+
   // 1. Register
   registry.registerPath({
     method: "post",
     path: "/auth/register",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Register a new user", 
     request: {
       body: { content: { "application/json": { schema: registerSchema } } },
     },
@@ -22,7 +25,8 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/login",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Login and get access token", 
     request: {
       body: { content: { "application/json": { schema: loginSchema } } },
     },
@@ -33,7 +37,8 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "get",
     path: "/auth/verify-email",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Verify user email with token", 
     parameters: [
       {
         name: "token",
@@ -49,11 +54,12 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/resend-verification",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Resend verification email", 
     request: {
       body: {
         content: { "application/json": { schema: forgotPasswordSchema } },
-      }, // ใช้ email schema เดียวกัน
+      },
     },
     responses: { 200: { description: "Verification email resent" } },
   });
@@ -62,7 +68,8 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/forgot-password",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Request password reset email", 
     request: {
       body: {
         content: { "application/json": { schema: forgotPasswordSchema } },
@@ -75,7 +82,8 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/reset-password",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Reset password with token", 
     request: {
       body: {
         content: { "application/json": { schema: resetPasswordSchema } },
@@ -88,9 +96,9 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/logout",
-    tags: ["Authentication"],
-
-    security: [{ bearerAuth: [] }], // ใส่แม่กุญแจใน Swagger
+    tags: [TAG],
+    summary: "Logout current session", 
+    security: [{ bearerAuth: [] }],
     responses: { 200: { description: "Logout success" } },
   });
 
@@ -98,7 +106,8 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/logout-all",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Logout from all devices", 
     security: [{ bearerAuth: [] }],
     responses: { 200: { description: "Logged out from all devices" } },
   });
@@ -107,7 +116,8 @@ export const registerAuthDocs = () => {
   registry.registerPath({
     method: "post",
     path: "/auth/refresh-token",
-    tags: ["Authentication"],
+    tags: [TAG],
+    summary: "Refresh access token using refresh token", 
     security: [{ bearerAuth: [] }],
     requestBody: {
       required: true,

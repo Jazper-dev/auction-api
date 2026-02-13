@@ -4,10 +4,14 @@ import { registry } from "./registry.js";
 import { registerAuthDocs } from "./auth.doc.js";
 import { registerProductDocs } from "./product.doc.js";
 import { registerUploadDocs } from "./upload.doc.js";
+import { registerUserDocs } from "./auctions.doc.js";
+import { registerUserAssetsDocs } from "./user.doc.js";
 
 registerAuthDocs();
 registerProductDocs();
 registerUploadDocs();
+registerUserDocs();
+registerUserAssetsDocs();
 
 
 const generator = new OpenApiGeneratorV3(registry.definitions);
