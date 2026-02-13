@@ -10,10 +10,27 @@ export const minioClient = new Minio.Client({
 });
 
 
-export const initMinio = async (bucketName: string) => {
-  const exists = await minioClient.bucketExists(bucketName);
-  if (!exists) {
-    await minioClient.makeBucket(bucketName, 'us-east-1');
-    console.log(`Bucket ${bucketName} created successfully.`);
+export const initMinio = async () => {
+  const buckets = ['images', 'videos']; 
+
+  for (const bucket of buckets) {
+    const exists = await minioClient.bucketExists(bucket);
+    if (!exists) {
+      await minioClient.makeBucket(bucket, 'us-east-1');
+      console.log(`✅ Bucket "${bucket}" created successfully.`);
+
+      const policy = {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Effect: "Allow",
+            Principal: { AWS: ["*"] },
+            Action: ["s3:GetObject"],
+            Resource: [`arn:aws:s3:::${bucket}/*`],
+          },
+        ],
+      };
+      await minioClient.setBucketPolicy(bucket, JSON.stringify(policy));
+    }
   }
 };
