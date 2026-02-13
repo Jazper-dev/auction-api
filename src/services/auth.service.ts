@@ -8,7 +8,7 @@ import {
   verifyRefreshToken,
 } from "../utils/jwt.util.js";
 import { AppError } from "../utils/appError.js";
-
+import crypto from "crypto"
 interface TokenPayload {
   id: number;
   role: string;
@@ -50,12 +50,16 @@ export const loginUser = async (loginData: any) => {
   if (!user.isVerified)
     throw new AppError("Account not verified. Please check your email.", 403);
 
+  await prisma.session.deleteMany({
+    where: { userId: user.id },
+  });
+ const temp = crypto.randomBytes(20).toString('hex');
   const session = await prisma.session.create({
-  data: {
-    userId: user.id,
-    refreshToken: "temp", 
-    expiresAt: new Date(),
-  },
+    data: {
+      userId: user.id,
+      refreshToken: temp,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
   });
 
   const accessToken = generateAccessToken({
@@ -95,7 +99,6 @@ export const loginUser = async (loginData: any) => {
     },
   };
 };
-
 
 export const logOutUser = async (sessionId: string) => {
   const session = await prisma.session.findUnique({ where: { id: sessionId } });
@@ -197,7 +200,9 @@ export const resetPassword = async (token: string, newPassword: string) => {
 };
 
 export const refreshAccessToken = async (oldRefreshToken: string) => {
-  const payload = verifyRefreshToken(oldRefreshToken) as unknown as TokenPayload;
+  const payload = verifyRefreshToken(
+    oldRefreshToken,
+  ) as unknown as TokenPayload;
 
   if (!payload || !payload.sessionId) {
     throw new AppError("Invalid or expired refresh token", 401);
@@ -212,11 +217,17 @@ export const refreshAccessToken = async (oldRefreshToken: string) => {
     throw new AppError("Session not found. Please login again.", 401);
   }
 
-  const isTokenMatch = await comparePassword(oldRefreshToken, oldSession.refreshToken);
+  const isTokenMatch = await comparePassword(
+    oldRefreshToken,
+    oldSession.refreshToken,
+  );
 
   if (!isTokenMatch) {
     await prisma.session.deleteMany({ where: { userId: oldSession.userId } });
-    throw new AppError("Security alert: Token reuse detected. All sessions revoked.", 401);
+    throw new AppError(
+      "Security alert: Token reuse detected. All sessions revoked.",
+      401,
+    );
   }
 
   await prisma.session.delete({ where: { id: oldSession.id } });
@@ -224,7 +235,7 @@ export const refreshAccessToken = async (oldRefreshToken: string) => {
   const newSession = await prisma.session.create({
     data: {
       userId: oldSession.userId,
-      refreshToken: "PENDING", 
+      refreshToken: "PENDING",
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       deviceInfo: oldSession.deviceInfo,
     },
@@ -241,7 +252,6 @@ export const refreshAccessToken = async (oldRefreshToken: string) => {
     role: oldSession.user.role,
     sessionId: newSession.id,
   });
-
 
   const hashedNewRefreshToken = await hashPassword(newRefreshToken);
   await prisma.session.update({

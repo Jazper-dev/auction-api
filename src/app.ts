@@ -9,14 +9,15 @@ import routes from "./routes/index.js";
 dotenv.config();
 
 const app: Application = express();
+const API_VERSION = process.env.VERSION;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(errorHandler);
-app.use("/api/V1/", routes);
-// Swagger Auto-generated
+app.use(API_VERSION!, routes);
+// Swagger generated
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.get('/', (req: Request, res: Response) => {
